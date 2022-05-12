@@ -7,7 +7,6 @@ extern "C" {
 #endif
 
 #pragma once
-#include "esp_attr.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include "epd_internals.h"
@@ -451,7 +450,7 @@ void epd_push_pixels(EpdRect area, short time, int color);
  *      If you don't have special waveforms, use `EPD_BUILTIN_WAVEFORM`.
  * @returns `EPD_DRAW_SUCCESS` on sucess, a combination of error flags otherwise.
  */
-enum EpdDrawError IRAM_ATTR epd_draw_base(EpdRect area,
+enum EpdDrawError epd_draw_base(EpdRect area,
                             const uint8_t *data,
                             EpdRect crop_to,
                             enum EpdDrawMode mode,

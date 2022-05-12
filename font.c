@@ -1,12 +1,7 @@
 #include "epd_driver.h"
-#include "esp_assert.h"
-#include "esp_heap_caps.h"
-#include "esp_log.h"
-#if ESP_IDF_VERSION < (4, 0, 0) || ARDUINO_ARCH_ESP32
-#include "rom/miniz.h"
-#else
-#include "esp32/rom/miniz.h"
-#endif
+#include "miniz.h"
+#include "miniz.c"
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -93,7 +88,7 @@ const EpdGlyph* epd_get_glyph(const EpdFont *font, uint32_t code_point) {
   return NULL;
 }
 
-static int uncompress(uint8_t *dest, uint32_t uncompressed_size, const uint8_t *source, uint32_t source_size) {
+static int do_uncompress(uint8_t *dest, uint32_t uncompressed_size, const uint8_t *source, uint32_t source_size) {
     if (uncompressed_size == 0 || dest == NULL || source_size == 0 || source == NULL) {
         return -1;
     }
@@ -110,7 +105,7 @@ static int uncompress(uint8_t *dest, uint32_t uncompressed_size, const uint8_t *
 /*!
    @brief   Draw a single character to a pre-allocated buffer.
 */
-static enum EpdDrawError IRAM_ATTR draw_char(const EpdFont *font, uint8_t *buffer,
+static enum EpdDrawError draw_char(const EpdFont *font, uint8_t *buffer,
                                 int *cursor_x, int cursor_y, uint32_t cp,
                                 const EpdFontProperties *props) {
 
@@ -135,10 +130,10 @@ static enum EpdDrawError IRAM_ATTR draw_char(const EpdFont *font, uint8_t *buffe
   if (font->compressed) {
     uint8_t* tmp_bitmap = (uint8_t *)malloc(bitmap_size);
     if (tmp_bitmap == NULL && bitmap_size) {
-      ESP_LOGE("font", "malloc failed.");
+      fprintf(stderr, "malloc failed.");
       return EPD_DRAW_FAILED_ALLOC;
     }
-    uncompress(tmp_bitmap, bitmap_size, &font->bitmap[offset],
+    do_uncompress(tmp_bitmap, bitmap_size, &font->bitmap[offset],
                glyph->compressed_size);
     bitmap = tmp_bitmap;
   } else {
@@ -346,7 +341,8 @@ static enum EpdDrawError epd_write_line(
   if (props.flags & EPD_DRAW_BACKGROUND) {
     for (int l = local_cursor_y - font->ascender;
          l < local_cursor_y - font->descender; l++) {
-      epd_draw_hline(local_cursor_x, l, w, bg << 4, buffer);
+      //FIXME: following function is not implemented
+      //epd_draw_hline(local_cursor_x, l, w, bg << 4, buffer);
     }
   }
   enum EpdDrawError err = EPD_DRAW_SUCCESS;
@@ -372,12 +368,12 @@ enum EpdDrawError epd_write_string(
 ) {
   char *token, *newstring, *tofree;
   if (string == NULL) {
-    ESP_LOGE("font.c", "cannot draw a NULL string!");
+    fprintf(stderr, "cannot draw a NULL string!");
     return EPD_DRAW_STRING_INVALID;
   }
   tofree = newstring = strdup(string);
   if (newstring == NULL) {
-    ESP_LOGE("font.c", "cannot allocate string copy!");
+    fprintf(stderr, "cannot allocate string copy!");
     return EPD_DRAW_FAILED_ALLOC;
   }
 
