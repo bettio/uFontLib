@@ -12,66 +12,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct {
-  int phases;
-  const uint8_t* luts;
-  /// If we have timing information for the individual
-  /// phases, this is an array of the on-times for each phase.
-  /// Otherwise, this is NULL.
-  const int* phase_times;
-} EpdWaveformPhases;
-
-typedef struct {
-  uint8_t type;
-  uint8_t temp_ranges;
-  EpdWaveformPhases const **range_data;
-} EpdWaveformMode;
-
-typedef struct {
-  int min;
-  int max;
-} EpdWaveformTempInterval;
-
-typedef struct {
-  uint8_t num_modes;
-  uint8_t num_temp_ranges;
-  EpdWaveformMode const **mode_data;
-  EpdWaveformTempInterval const *temp_intervals;
-} EpdWaveform;
-
-
-
-
-
-extern const EpdWaveform epdiy_ED060SC4;
-extern const EpdWaveform epdiy_ED097OC4;
-extern const EpdWaveform epdiy_ED047TC1;
-#if defined(CONFIG_EPD_DISPLAY_TYPE_ED047TC2)
-  extern const EpdWaveform epdiy_ED047TC2;
-#endif
-extern const EpdWaveform epdiy_ED097TC2;
-extern const EpdWaveform epdiy_ED060XC3;
-extern const EpdWaveform epdiy_ED060SCT;
-extern const EpdWaveform epdiy_ED133UT2;
-
-#if defined(CONFIG_EPD_DISPLAY_TYPE_ED047TC1)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED047TC1
-#elif defined(CONFIG_EPD_DISPLAY_TYPE_ED047TC2)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED047TC2
-#elif defined(CONFIG_EPD_DISPLAY_TYPE_ED060SC4)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED060SC4
-#elif defined(CONFIG_EPD_DISPLAY_TYPE_ED060XC3)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED060XC3
-#elif defined(CONFIG_EPD_DISPLAY_TYPE_ED060SCT)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED060SCT
-#elif defined(CONFIG_EPD_DISPLAY_TYPE_ED097OC4) || defined(CONFIG_EPD_DISPLAY_TYPE_ED097OC4_LQ)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED097OC4
-#elif defined(CONFIG_EPD_DISPLAY_TYPE_ED097TC2)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED097TC2
-#elif defined (CONFIG_EPD_DISPLAY_TYPE_ED133UT2)
-#define EPD_BUILTIN_WAVEFORM &epdiy_ED133UT2
-#endif
-
 /// Font data stored PER GLYPH
 typedef struct __attribute__((__packed__)) {
   uint16_t width;            ///< Bitmap dimensions in pixels
@@ -104,5 +44,3 @@ typedef struct {
 
 
 #endif // EPD_INTERNALS_H
-
-
