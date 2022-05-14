@@ -396,3 +396,30 @@ enum EpdDrawError epd_write_string(
     free(tofree);
     return err;
 }
+
+EpdFont *ufont_load_font(const void *ufont, const void *glyph, const void *intervals, const void *bitmap)
+{
+    struct __attribute__((__packed__))
+    {
+        char magic[4];
+        uint32_t interval_count;
+        uint8_t compressed;
+        uint16_t advance_y;
+        uint16_t ascender;
+        uint16_t descender;
+    } serialized_ufont;
+
+    memcpy(&serialized_ufont, ufont, sizeof(serialized_ufont));
+
+    EpdFont *loaded_font = malloc(sizeof(EpdFont));
+    loaded_font->bitmap = bitmap;
+    loaded_font->glyph = glyph;
+    loaded_font->intervals = intervals;
+    loaded_font->interval_count = serialized_ufont.interval_count;
+    loaded_font->compressed = serialized_ufont.compressed;
+    loaded_font->advance_y = serialized_ufont.advance_y;
+    loaded_font->ascender = serialized_ufont.ascender;
+    loaded_font->descender = serialized_ufont.descender;
+
+    return loaded_font;
+}

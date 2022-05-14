@@ -128,12 +128,45 @@ for i_start, i_end in intervals:
 # pipe seems to be a good heuristic for the "real" descender
 face = load_glyph(ord('|'))
 
+file = open(f"{font_name}.data", "wb")
 glyph_data = []
 glyph_props = []
 for index, glyph in enumerate(all_glyphs):
     props, compressed = glyph
+    file.write(compressed)
     glyph_data.extend([b for b in compressed])
     glyph_props.append(props)
+file.close()
+
+
+file = open(f"{font_name}.props", "wb")
+for i, g in enumerate(glyph_props):
+    file.write(g.width.to_bytes(2, byteorder='little', signed=False))
+    file.write(g.height.to_bytes(2, byteorder='little', signed=False))
+    file.write(g.advance_x.to_bytes(2, byteorder='little', signed=False))
+    file.write(g.left.to_bytes(2, byteorder='little', signed=True))
+    file.write(g.top.to_bytes(2, byteorder='little', signed=True))
+    file.write(g.compressed_size.to_bytes(4, byteorder='little', signed=False))
+    file.write(g.data_offset.to_bytes(4, byteorder='little', signed=False))
+file.close()
+
+file = open(f"{font_name}.intervals", "wb")
+offset = 0
+for i_start, i_end in intervals:
+    file.write(i_start.to_bytes(4, byteorder='little', signed=False))
+    file.write(i_end.to_bytes(4, byteorder='little', signed=False))
+    file.write(offset.to_bytes(4, byteorder='little', signed=False))
+file.close()
+
+file = open(f"{font_name}.ufont", "wb")
+file.write(b'uFL1')
+file.write(len(intervals).to_bytes(4, byteorder='little', signed=False))
+comp = 1 if compress else 0
+file.write(comp.to_bytes(1, byteorder='little', signed=False))
+file.write(norm_ceil(face.size.height).to_bytes(2, byteorder='little', signed=True))
+file.write(norm_ceil(face.size.ascender).to_bytes(2, byteorder='little', signed=True))
+file.write(norm_floor(face.size.descender).to_bytes(2, byteorder='little', signed=True))
+file.close()
 
 print("total", total_packed, file=sys.stderr)
 print("compressed", total_size, file=sys.stderr)

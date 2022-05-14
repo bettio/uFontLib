@@ -137,6 +137,9 @@ enum EpdDrawError epd_write_default(const EpdFont *font, const char *string, int
  */
 const EpdGlyph* epd_get_glyph(const EpdFont *font, uint32_t code_point);
 
+EpdFont *ufont_load_font(const void *ufont, const void *glyph, const void *intervals,
+        const void *bitmap);
+
 #ifdef __cplusplus
 }
 #endif
