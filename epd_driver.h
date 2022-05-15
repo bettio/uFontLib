@@ -140,6 +140,13 @@ const EpdGlyph* epd_get_glyph(const EpdFont *font, uint32_t code_point);
 EpdFont *ufont_load_font(const void *ufont, const void *glyph, const void *intervals,
         const void *bitmap);
 
+struct UFonts;
+typedef struct UFonts UFonts;
+
+UFonts *ufonts_new();
+void ufonts_register(UFonts *ufonts, const char *handle, EpdFont *font);
+EpdFont *ufonts_find_by_handle(UFonts *ufonts, const char *handle);
+
 #ifdef __cplusplus
 }
 #endif

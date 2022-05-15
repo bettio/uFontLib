@@ -423,3 +423,84 @@ EpdFont *ufont_load_font(const void *ufont, const void *glyph, const void *inter
 
     return loaded_font;
 }
+
+#define GET_LIST_ENTRY(list_item, type, list_head_member) \
+    ((type *) (((char *) (list_item)) - ((unsigned long) &((type *) 0)->list_head_member)))
+
+#define LIST_FOR_EACH(item, head) \
+    for (item = (head)->next; item != (head); item = item->next)
+
+#define MUTABLE_LIST_FOR_EACH(item, tmp, head) \
+    for (item = (head)->next, tmp = item->next; item != (head); item = tmp, tmp = item->next)
+
+struct UFListHead;
+
+struct UFListHead
+{
+    struct UFListHead *next;
+    struct UFListHead *prev;
+};
+
+static inline void uflist_insert(struct UFListHead *new_item, struct UFListHead *prev_head, struct UFListHead *next_head)
+{
+    new_item->prev = prev_head;
+    new_item->next = next_head;
+    next_head->prev = new_item;
+    prev_head->next = new_item;
+}
+
+static inline void uflist_append(struct UFListHead *head, struct UFListHead *new_item)
+{
+    uflist_insert(new_item, head->prev, head);
+}
+
+static inline void uflist_remove(struct UFListHead *remove_item)
+{
+    remove_item->prev->next = remove_item->next;
+    remove_item->next->prev = remove_item->prev;
+}
+
+static inline void uflist_init(struct UFListHead *list_item)
+{
+    list_item->prev = list_item;
+    list_item->next = list_item;
+}
+
+typedef struct
+{
+    struct UFListHead list_head;
+    const char *handle;
+    EpdFont *font;
+} UFont;
+
+struct UFonts
+{
+    struct UFListHead font_list;
+};
+
+UFonts *ufonts_new()
+{
+    UFonts *ufonts = malloc(sizeof(UFonts));
+    uflist_init(&ufonts->font_list);
+}
+
+void ufonts_register(UFonts *ufonts, const char *handle, EpdFont *font)
+{
+    UFont *ufont = malloc(sizeof(UFont));
+    ufont->handle = strdup(handle);
+    ufont->font = font;
+    uflist_append(&ufonts->font_list, &ufont->list_head);
+}
+
+EpdFont *ufonts_find_by_handle(UFonts *ufonts, const char *handle)
+{
+    struct UFListHead *item;
+    LIST_FOR_EACH (item, &ufonts->font_list) {
+        UFont *ufont = GET_LIST_ENTRY(item, UFont, list_head);
+        if (!strcmp(handle, ufont->handle)) {
+            return ufont->font;
+        }
+    }
+
+    return NULL;
+}
