@@ -147,6 +147,8 @@ UFonts *ufonts_new();
 void ufonts_register(UFonts *ufonts, const char *handle, EpdFont *font);
 EpdFont *ufonts_find_by_handle(UFonts *ufonts, const char *handle);
 
+EpdFont *ufont_parse(const void *iff_binary, int buf_size);
+
 #ifdef __cplusplus
 }
 #endif

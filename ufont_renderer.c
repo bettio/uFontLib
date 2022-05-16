@@ -401,7 +401,6 @@ EpdFont *ufont_load_font(const void *ufont, const void *glyph, const void *inter
 {
     struct __attribute__((__packed__))
     {
-        char magic[4];
         uint32_t interval_count;
         uint8_t compressed;
         uint16_t advance_y;
@@ -482,6 +481,8 @@ UFonts *ufonts_new()
 {
     UFonts *ufonts = malloc(sizeof(UFonts));
     uflist_init(&ufonts->font_list);
+
+    return ufonts;
 }
 
 void ufonts_register(UFonts *ufonts, const char *handle, EpdFont *font)
@@ -503,4 +504,75 @@ EpdFont *ufonts_find_by_handle(UFonts *ufonts, const char *handle)
     }
 
     return NULL;
+}
+
+#ifdef __ORDER_LITTLE_ENDIAN__
+    #ifdef __GNUC__
+        #define UF_ENDIAN_SWAP_32(value) __builtin_bswap32(value)
+    #else
+        #define UF_ENDIAN_SWAP_32(value) ((((value) & 0xFF) << 24) | (((value) & 0xFF00) << 8) | \
+                (((value) & 0xFF0000) >> 8) | (((value) & 0xFF000000) >> 24))
+    #endif
+#else
+    #define UF_ENDIAN_SWAP_32(value) (value)
+#endif
+
+struct UFIFFRecord
+{
+    const char name[4];
+    uint32_t size;
+};
+
+static uint32_t ufont_iff_align(uint32_t size)
+{
+    return ((size + 4 - 1) >> 2) << 2;
+}
+
+static int ufont_iff_is_valid_ufl(const void *iff)
+{
+    return memcmp(iff, "UFL0", 4) == 0;
+}
+
+EpdFont *ufont_parse(const void *iff_binary, int buf_size)
+{
+    if (ufont_iff_is_valid_ufl(iff_binary)) {
+        return NULL;
+    }
+
+    const uint8_t *data = iff_binary;
+
+    int current_pos = 12;
+
+    uint32_t iff_size = UF_ENDIAN_SWAP_32(*(((uint32_t *) (data + 4))));
+    int file_size = iff_size;
+    if (buf_size < file_size) {
+        fprintf(stderr, "warning: buffer holding IFF %i is smaller than IFF size: %i", buf_size, file_size);
+        return NULL;
+    }
+
+    const void *ufont = NULL;
+    const void *glyph = NULL;
+    const void *intervals = NULL;
+    const void *bitmap = NULL;
+
+    do {
+        struct UFIFFRecord *current_record = (struct UFIFFRecord *) (data + current_pos);
+
+        if (!memcmp(current_record->name, "uFH0", 4)) {
+            ufont = data + current_pos + sizeof(struct UFIFFRecord);
+
+        } else if (!memcmp(current_record->name, "uFP0", 4)) {
+            glyph = data + current_pos + sizeof(struct UFIFFRecord);
+
+        } else if (!memcmp(current_record->name, "uFI0", 4)) {
+            intervals = data + current_pos + sizeof(struct UFIFFRecord);
+
+        } else if (!memcmp(current_record->name, "uFB0", 4)) {
+            bitmap = data + current_pos + sizeof(struct UFIFFRecord);
+        }
+
+        current_pos += ufont_iff_align(UF_ENDIAN_SWAP_32(current_record->size) + 8);
+    } while (current_pos < file_size);
+
+    return ufont_load_font(ufont, glyph, intervals, bitmap);
 }
