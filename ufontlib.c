@@ -342,7 +342,8 @@ static enum EpdDrawError epd_write_line(
             break;
     }
 
-    uint8_t bg = props.bg_color;
+    //FIXME: needed from epd_draw_hline
+    //uint8_t bg = props.bg_color;
     if (props.flags & EPD_DRAW_BACKGROUND) {
         for (int l = local_cursor_y - font->ascender;
              l < local_cursor_y - font->descender; l++) {
