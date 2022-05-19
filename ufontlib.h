@@ -1,7 +1,3 @@
-/**
- * @file epd_driver.h
- * A driver library for drawing to an EPD.
- */
 #ifdef __cplusplus
 extern "C" {
 #endif
