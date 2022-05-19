@@ -83,7 +83,7 @@ def load_glyph(code_point):
             return face
             break
         face_index += 1
-        print (f"falling back to font {face_index} for {chr(code_point)}.", file=sys.stderr)
+        print (f"falling back to font {face_index} for {chr(code_point)} ({code_point}).", file=sys.stderr)
     raise ValueError(f"code point {code_point} not found in font stack!")
 
 def pad(file, section_size):
