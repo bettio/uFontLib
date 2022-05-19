@@ -82,7 +82,7 @@ EpdFontProperties epd_font_properties_default()
 const EpdGlyph *epd_get_glyph(const EpdFont *font, uint32_t code_point)
 {
     const EpdUnicodeInterval *intervals = font->intervals;
-    for (int i = 0; i < font->interval_count; i++) {
+    for (unsigned int i = 0; i < font->interval_count; i++) {
         const EpdUnicodeInterval *interval = &intervals[i];
         if (code_point >= interval->first && code_point <= interval->last) {
             return &font->glyph[interval->offset + (code_point - interval->first)];
