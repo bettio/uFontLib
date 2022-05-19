@@ -165,12 +165,12 @@ const EpdGlyph* epd_get_glyph(const EpdFont *font, uint32_t code_point);
 EpdFont *ufont_load_font(const void *ufont, const void *glyph, const void *intervals,
         const void *bitmap);
 
-struct UFonts;
-typedef struct UFonts UFonts;
+struct UFontManager;
+typedef struct UFontManager UFontManager;
 
-UFonts *ufonts_new();
-void ufonts_register(UFonts *ufonts, const char *handle, EpdFont *font);
-EpdFont *ufonts_find_by_handle(UFonts *ufonts, const char *handle);
+UFontManager *ufont_manager_new();
+void ufont_manager_register(UFontManager *ufont_manager, const char *handle, EpdFont *font);
+EpdFont *ufont_manager_find_by_handle(UFontManager *ufont_manager, const char *handle);
 
 EpdFont *ufont_parse(const void *iff_binary, int buf_size);
 

@@ -472,31 +472,31 @@ typedef struct
     EpdFont *font;
 } UFont;
 
-struct UFonts
+struct UFontManager
 {
     struct UFListHead font_list;
 };
 
-UFonts *ufonts_new()
+UFontManager *ufont_manager_new()
 {
-    UFonts *ufonts = malloc(sizeof(UFonts));
-    uflist_init(&ufonts->font_list);
+    UFontManager *ufont_manager = malloc(sizeof(UFontManager));
+    uflist_init(&ufont_manager->font_list);
 
-    return ufonts;
+    return ufont_manager;
 }
 
-void ufonts_register(UFonts *ufonts, const char *handle, EpdFont *font)
+void ufont_manager_register(UFontManager *ufont_manager, const char *handle, EpdFont *font)
 {
     UFont *ufont = malloc(sizeof(UFont));
     ufont->handle = strdup(handle);
     ufont->font = font;
-    uflist_append(&ufonts->font_list, &ufont->list_head);
+    uflist_append(&ufont_manager->font_list, &ufont->list_head);
 }
 
-EpdFont *ufonts_find_by_handle(UFonts *ufonts, const char *handle)
+EpdFont *ufont_manager_find_by_handle(UFontManager *ufont_manager, const char *handle)
 {
     struct UFListHead *item;
-    LIST_FOR_EACH (item, &ufonts->font_list) {
+    LIST_FOR_EACH (item, &ufont_manager->font_list) {
         UFont *ufont = GET_LIST_ENTRY(item, UFont, list_head);
         if (!strcmp(handle, ufont->handle)) {
             return ufont->font;
