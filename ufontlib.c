@@ -112,7 +112,7 @@ static int do_uncompress(uint8_t *dest, uint32_t uncompressed_size, const uint8_
 /*!
    @brief   Draw a single character to a pre-allocated buffer.
 */
-static enum EpdDrawError draw_char(const EpdFont *font, uint8_t *buffer,
+static enum EpdDrawError draw_char(const EpdFont *font, void *buffer,
     int *cursor_x, int cursor_y, uint32_t cp,
     const EpdFontProperties *props)
 {
@@ -289,7 +289,7 @@ void epd_get_text_bounds(const EpdFont *font, const char *string,
 
 static enum EpdDrawError epd_write_line(
     const EpdFont *font, const char *string, int *cursor_x,
-    int *cursor_y, uint8_t *framebuffer,
+    int *cursor_y, void *framebuffer,
     const EpdFontProperties *properties)
 {
 
@@ -319,7 +319,6 @@ static enum EpdDrawError epd_write_line(
         return EPD_DRAW_NO_DRAWABLE_CHARACTERS;
     }
 
-    uint8_t *buffer = framebuffer;
     int local_cursor_x = *cursor_x;
     int local_cursor_y = *cursor_y;
     uint32_t c;
@@ -348,12 +347,12 @@ static enum EpdDrawError epd_write_line(
         for (int l = local_cursor_y - font->ascender;
              l < local_cursor_y - font->descender; l++) {
             //FIXME: following function is not implemented
-            //epd_draw_hline(local_cursor_x, l, w, bg << 4, buffer);
+            //epd_draw_hline(local_cursor_x, l, w, bg << 4, framebuffer);
         }
     }
     enum EpdDrawError err = EPD_DRAW_SUCCESS;
     while ((c = next_cp((const uint8_t **) &string))) {
-        err |= draw_char(font, buffer, &local_cursor_x, local_cursor_y, c, &props);
+        err |= draw_char(font, framebuffer, &local_cursor_x, local_cursor_y, c, &props);
     }
 
     *cursor_x += local_cursor_x - cursor_x_init;
@@ -362,7 +361,7 @@ static enum EpdDrawError epd_write_line(
 }
 
 enum EpdDrawError epd_write_default(const EpdFont *font, const char *string, int *cursor_x,
-    int *cursor_y, uint8_t *framebuffer)
+    int *cursor_y, void *framebuffer)
 {
     const EpdFontProperties props = epd_font_properties_default();
     return epd_write_string(font, string, cursor_x, cursor_y, framebuffer, &props);
@@ -370,7 +369,7 @@ enum EpdDrawError epd_write_default(const EpdFont *font, const char *string, int
 
 enum EpdDrawError epd_write_string(
     const EpdFont *font, const char *string, int *cursor_x,
-    int *cursor_y, uint8_t *framebuffer,
+    int *cursor_y, void *framebuffer,
     const EpdFontProperties *properties)
 {
     char *token, *newstring, *tofree;

@@ -103,7 +103,7 @@ typedef struct {
  * @param color: The gray value of the line (see [Colors](#Colors));
  * @param framebuffer: The framebuffer to draw to,
  */
-void epd_draw_pixel(int x, int y, uint8_t color, uint8_t *framebuffer);
+void epd_draw_pixel(int x, int y, uint8_t color, void *framebuffer);
 
 /**
  * Draw a horizontal line to a given framebuffer.
@@ -116,7 +116,7 @@ void epd_draw_pixel(int x, int y, uint8_t color, uint8_t *framebuffer);
  *  which must be `EPD_WIDTH / 2 * EPD_HEIGHT` bytes large.
  */
 void epd_draw_hline(int x, int y, int length, uint8_t color,
-                    uint8_t *framebuffer);
+                    void *framebuffer);
 
 /**
  * The default font properties.
@@ -148,14 +148,14 @@ EpdRect epd_get_string_rect (const EpdFont *font, const char *string,
  * Write text to the EPD.
  */
 enum EpdDrawError epd_write_string(const EpdFont *font, const char *string, int *cursor_x,
-                int *cursor_y, uint8_t *framebuffer,
+                int *cursor_y, void *framebuffer,
                 const EpdFontProperties *properties);
 
 /**
  * Write a (multi-line) string to the EPD.
  */
 enum EpdDrawError epd_write_default(const EpdFont *font, const char *string, int *cursor_x,
-                  int *cursor_y, uint8_t *framebuffer);
+                  int *cursor_y, void *framebuffer);
 
 /**
  * Get the font glyph for a unicode code point.
