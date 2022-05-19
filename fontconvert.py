@@ -90,6 +90,9 @@ def pad(file, section_size):
     for i in range(section_size, ((section_size + 4 - 1) >> 2) << 2):
         file.write(b'\0')
 
+def align(size):
+    return ((size + 4 - 1) >> 2) << 2
+
 for i_start, i_end in intervals:
     for code_point in range(i_start, i_end + 1):
         face = load_glyph(code_point)
@@ -142,7 +145,8 @@ for index, glyph in enumerate(all_glyphs):
 header_size = 11
 props_size = len(glyph_props) * 18
 intervals_size = len(intervals) * 12
-file_size = header_size + props_size + intervals_size + total_size
+file_size = 4 + align(header_size) + align(props_size) + align(intervals_size) + align(total_size) + 8 * 4
+
 file = open(f"{font_name}.ufont", "wb")
 file.write(b'FORM')
 file.write(file_size.to_bytes(4, byteorder='big', signed=False))
