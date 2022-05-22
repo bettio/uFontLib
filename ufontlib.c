@@ -1,6 +1,10 @@
 #include "ufontlib.h"
+#ifdef WITH_ZLIB
+#include <zlib.h>
+#else
 #include "miniz.c"
 #include "miniz.h"
+#endif
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -28,11 +32,6 @@ static utf_t *utf[] = {
     [4] = &(utf_t){ 0b00000111, 0b11110000, 0200000, 04177777, 3 },
     &(utf_t){ 0 },
 };
-
-/**
- * static decompressor object for compressed fonts.
- */
-static tinfl_decompressor decomp;
 
 static inline int min(int x, int y) { return x < y ? x : y; }
 static inline int max(int x, int y) { return x > y ? x : y; }
@@ -94,8 +93,41 @@ const EpdGlyph *epd_get_glyph(const EpdFont *font, uint32_t code_point)
     return NULL;
 }
 
+#ifdef WITH_ZLIB
 static int do_uncompress(uint8_t *dest, size_t uncompressed_size, const uint8_t *source, size_t source_size)
 {
+    if (uncompressed_size == 0 || dest == NULL || source_size == 0 || source == NULL) {
+        return -1;
+    }
+
+    z_stream infstream;
+    infstream.zalloc = Z_NULL;
+    infstream.zfree = Z_NULL;
+    infstream.opaque = Z_NULL;
+    infstream.avail_in = (uInt) source_size;
+    infstream.next_in = source;
+    infstream.avail_out = uncompressed_size;
+    infstream.next_out = dest;
+
+    int ret = inflateInit(&infstream);
+    if (ret != Z_OK) {
+        fprintf(stderr, "Failed inflateInit\n");
+        return NULL;
+    }
+    ret = inflate(&infstream, Z_NO_FLUSH);
+    if (ret != Z_OK) {
+        fprintf(stderr, "Failed inflate\n");
+        return NULL;
+    }
+    inflateEnd(&infstream);
+
+    return 0;
+}
+#else
+static int do_uncompress(uint8_t *dest, size_t uncompressed_size, const uint8_t *source, size_t source_size)
+{
+    static tinfl_decompressor decomp;
+
     if (uncompressed_size == 0 || dest == NULL || source_size == 0 || source == NULL) {
         return -1;
     }
@@ -108,6 +140,7 @@ static int do_uncompress(uint8_t *dest, size_t uncompressed_size, const uint8_t 
     }
     return 0;
 }
+#endif
 
 /*!
    @brief   Draw a single character to a pre-allocated buffer.
