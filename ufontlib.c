@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct
@@ -105,19 +106,19 @@ static int do_uncompress(uint8_t *dest, size_t uncompressed_size, const uint8_t 
     infstream.zfree = Z_NULL;
     infstream.opaque = Z_NULL;
     infstream.avail_in = (uInt) source_size;
-    infstream.next_in = source;
+    infstream.next_in = (void *) source;
     infstream.avail_out = uncompressed_size;
     infstream.next_out = dest;
 
     int ret = inflateInit(&infstream);
     if (ret != Z_OK) {
         fprintf(stderr, "Failed inflateInit\n");
-        return NULL;
+        return -1;
     }
     ret = inflate(&infstream, Z_NO_FLUSH);
     if (ret != Z_OK) {
         fprintf(stderr, "Failed inflate\n");
-        return NULL;
+        return -1;
     }
     inflateEnd(&infstream);
 
