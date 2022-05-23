@@ -115,9 +115,9 @@ static int do_uncompress(uint8_t *dest, size_t uncompressed_size, const uint8_t 
         fprintf(stderr, "Failed inflateInit\n");
         return -1;
     }
-    ret = inflate(&infstream, Z_NO_FLUSH);
-    if (ret != Z_OK) {
-        fprintf(stderr, "Failed inflate\n");
+    ret = inflate(&infstream, Z_STREAM_END);
+    if (ret != Z_STREAM_END) {
+        fprintf(stderr, "Failed inflate: %i\n", ret);
         return -1;
     }
     inflateEnd(&infstream);
