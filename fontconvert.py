@@ -1,4 +1,10 @@
 #!python3
+#
+# Copyright 2019-2022 Valentin Roland <github@vroland.de>
+# Copyright 2021-2022 Martin Berlin <martin@luckycloud.de>
+# SPDX-License-Identifier: MIT
+#
+
 import freetype
 import zlib
 import sys
