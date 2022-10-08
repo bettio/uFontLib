@@ -1,3 +1,9 @@
+<!---
+  Copyright 2017-2021 Davide Bettio <davide@uninstall.it>
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # μFontLib
 
 Text rendering library for microcontrollers.
